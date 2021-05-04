@@ -55,10 +55,10 @@ class ClassFile:
         self.interfaces.append(name)
 
     def field(self, name, descriptor, access=["public"], attributes=[]):
-        self.fields.append(Field(name, descriptor, access, attributes))
+        self.fields.append(Field(self.addpool("utf8", name), self.addpool("utf8", descriptor), access, attributes))
 
     def method(self, name, descriptor, access=["public"], attributes=[]):
-        self.methods.append(Method(name, descriptor, access, attributes))
+        self.methods.append(Method(self.addpool("utf8", name), self.addpool("utf8", descriptor), access, attributes))
 
 class Field:
     def __init__(self, name, descriptor, access=["public"], attributes=[]):
