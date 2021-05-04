@@ -1,14 +1,16 @@
-from compiler import ClassFile, CodeAttribute
+from bytecompiler import ClassFile, CodeAttribute
 
 def test():
     c = ClassFile("Main")
 
-    constWorld = hex(c.addpool("string", c.addpool("utf8", "Hello, world!")))[2:].zfill(2)
-    constOut = hex(c.addpool("field", (c.addpool("class", c.addpool("utf8", "java/lang/System")), c.addpool("name_type", (c.addpool("utf8", "out"), c.addpool("utf8", "Ljava/io/PrintStream;"))))))[2:].zfill(4)
-    constPrintln = hex(c.addpool("method", (c.addpool("class", c.addpool("utf8", "java/io/PrintStream")), c.addpool("name_type", (c.addpool("utf8", "println"), c.addpool("utf8", "(Ljava/lang/String;)V"))))))[2:].zfill(4)
+    constWorld = c.qpool("string", "Hello, world!")
+    constSystem = c.qpool("class", "java/lang/System")
+    constOut = c.qpool("field", constSystem, "out", "Ljava/io/PrintStream;")
+    constPrintStream = c.qpool("class", "java/io/PrintStream")
+    constPrintln = c.qpool("method", constPrintStream, "println", "(Ljava/lang/String;)V")
 
-    code = "b2" + constOut + "12" + constWorld + "b6" + constPrintln + "b1"
-    c.method(c.addpool("utf8", "main"), c.addpool("utf8", "([Ljava/lang/String;)V"), ["public", "static"], [CodeAttribute(bytes.fromhex(code.replace(" ", "")))])
+    code = b"\xb2" + constOut.to_bytes(2, "big") + b"\x12" + constWorld.to_bytes(1, "big") + b"\xb6" + constPrintln.to_bytes(2, "big") + b"\xb1"
+    c.method(c.addpool("utf8", "main"), c.addpool("utf8", "([Ljava/lang/String;)V"), ["public", "static"], [CodeAttribute(code)])
 
     f = open("Main.class", "wb")
     f.write(c.serialize())

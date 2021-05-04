@@ -45,8 +45,11 @@ class ClassFile:
         
         return d
     
-    def addpool(self, etype, entry):
-        return self.pool.add(etype, entry)
+    def addpool(self, etype, *entry):
+        return self.pool.add(etype, *entry)
+
+    def qpool(self, etype, *entry): #Quick method allowing easy and uncomplicated constant generation
+        return self.pool.qadd(etype, *entry)
 
     def interface(self, name):
         self.interfaces.append(name)
@@ -127,9 +130,12 @@ class ConstantPool:
             d += entry
         return d
 
-    def add(self, etype, entry):
+    def add(self, etype, *entry):
         etype = etype.lower()
         self.__index += 1
+        
+        if len(entry) == 1:
+            entry = entry[0] #Quick hack with *args
 
         if etype == "utf8":
             self.entries.append(self._utf8Const(entry))
@@ -168,6 +174,26 @@ class ConstantPool:
             return 0
         
         return self.__index
+
+    def qadd(self, etype, *entry):
+        etype = etype.lower()
+
+        if len(entry) == 1:
+            entry = entry[0]
+        
+        if etype == "class":
+            return self.add("class", self.add("utf8", entry))
+        elif etype == "string":
+            return self.add("string", self.add("utf8", entry))
+        elif etype == "field": #entry -> (class index, name, type)
+            return self.add("field", entry[0], self.add("name_type", self.add("utf8", entry[1]), self.add("utf8", entry[2])))
+        elif etype == "method": #entry -> (class index, name, type)
+            return self.add("method", entry[0], self.add("name_type", self.add("utf8", entry[1]), self.add("utf8", entry[2])))
+        elif etype == "interface_method": #entry -> (class index, name, type)
+            return self.add("interface_method", entry[0], self.add("name_type", self.add("utf8", entry[1]), self.add("utf8", entry[2])))
+        else:
+            print("Invalid constant pool quicktype!")
+            return 0
 
     def _utf8Const(self, text):
         return (b"\x01" + len(text).to_bytes(2, "big") + text.encode("utf-8"))
