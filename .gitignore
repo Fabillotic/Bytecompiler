@@ -2,3 +2,6 @@
 __pycache__
 *.swp
 .ignore
+
+#Secret stuff in development
+byteassembler.py
