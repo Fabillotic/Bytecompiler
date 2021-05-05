@@ -1,3 +1,13 @@
+local -> one-byte local variable index
+const2 -> two-byte constant pool entry
+const -> one-byte constant pool entry
+byte -> single byte
+short -> two bytes
+tbranch -> two-byte branch
+fbranch -> four-byte branch
+special -> no idea what to do
+atype -> Array type
+
 32 aaload
 53 aastore
 01 aconst_null
