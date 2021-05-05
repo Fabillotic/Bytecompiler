@@ -1,15 +1,15 @@
 32 aaload
 53 aastore
 01 aconst_null
-19 aload index
+19 aload local
 2a aload_0
 2b aload_1
 2c aload_2
 2d aload_3
-bd anewarray index1,index2
+bd anewarray const2
 b0 areturn
 be arraylength
-3a astore index
+3a astore local
 4b astore_0
 4c astore_1
 4d astore_2
@@ -21,19 +21,19 @@ bf athrow
 ca breakpoint
 34 caload
 55 castore
-c0 checkcast index1,index2
+c0 checkcast const2
 90 d2f
 8e d2i
 8f d2l
 63 dadd
-31 daload index
+31 daload
 52 dastore
 98 dcmpg
 97 dcmpl
 0e dconst_0
 0f dconst_1
 6f ddiv
-18 dload
+18 dload local
 26 dload_0
 27 dload_1
 28 dload_2
@@ -42,7 +42,7 @@ c0 checkcast index1,index2
 77 dneg
 73 drem
 af dreturn
-39 dstore index
+39 dstore local
 47 dstore_0
 48 dstore_1
 49 dstore_2
@@ -66,7 +66,7 @@ af dreturn
 0c fconst_1
 0d fconst_2
 6e fdiv
-17 fload index
+17 fload local
 22 fload_0
 23 fload_1
 24 fload_2
@@ -75,16 +75,16 @@ af dreturn
 76 fneg
 72 frem
 ae freturn
-38 fstore index
+38 fstore local
 43 fstore_0
 44 fstore_1
 45 fstore_2
 46 fstore_3
 66 fsub
-b4 getfield index1,index2
-b2 getstatic index1,index2
-a7 goto branch1,branch2
-c8 goto_w branch1,branch2,branch3,branch4
+b4 getfield const2
+b2 getstatic const2
+a7 goto tbranch
+c8 goto_w fbranch
 91 i2b
 92 i2c
 87 i2d
@@ -103,24 +103,24 @@ c8 goto_w branch1,branch2,branch3,branch4
 07 iconst_4
 08 iconst_5
 6c idiv
-a5 if_acmpeq branch1,branch2
-a6 if_acmpne branch1,branch2
-9f if_icmpeq branch1,branch2
-a2 if_icmpge branch1,branch2
-a3 if_icmpgt branch1,branch2
-a4 if_icmple branch1,branch2
-a1 if_icmplt branch1,branch2
-a0 if_icmpne branch1,branch2
-99 ifeq branch1,branch2
-9c ifge branch1,branch2
-9d ifgt branch1,branch2
-9e ifle branch1,branch2
-9b iflt branch1,branch2
-9a ifne branch1,branch2
-c7 ifnonnull branch1,branch2
-c6 ifnull branch1,branch2
-84 iinc index,const
-15 iload index
+a5 if_acmpeq tbranch
+a6 if_acmpne tbranch
+9f if_icmpeq tbranch
+a2 if_icmpge tbranch
+a3 if_icmpgt tbranch
+a4 if_icmple tbranch
+a1 if_icmplt tbranch
+a0 if_icmpne tbranch
+99 ifeq tbranch
+9c ifge tbranch
+9d ifgt tbranch
+9e ifle tbranch
+9b iflt tbranch
+9a ifne tbranch
+c7 ifnonnull tbranch
+c6 ifnull tbranch
+84 iinc local byte
+15 iload local
 1a iload_0
 1b iload_1
 1c iload_2
@@ -129,18 +129,18 @@ fe impdep1
 ff impdep2
 68 imul
 74 ineg
-c1 instanceof index1,index2
-ba invokedynamic index1,index2,0,0
-b9 invokeinterface index1,index2,count,0
-b7 invokespecial index1,index2
-b8 invokestatic index1,index2
-b6 invokevirtual index1,index2
+c1 instanceof const2
+ba invokedynamic const2
+b9 invokeinterface const2 byte
+b7 invokespecial const2
+b8 invokestatic const2
+b6 invokevirtual const2
 80 ior
 70 irem
 ac ireturn
 78 ishl
 7a ishr
-36 istore index
+36 istore local
 3b istore_0
 3c istore_1
 3d istore_2
@@ -148,8 +148,8 @@ ac ireturn
 64 isub
 7c iushr
 82 ixor
-a8 jsr branch1,branch2
-c9 jsr_w branch1,branch2,branch3,branch4
+a8 jsr tbranch
+c9 jsr_w fbranch
 8a l2d
 89 l2f
 88 l2i
@@ -160,24 +160,24 @@ c9 jsr_w branch1,branch2,branch3,branch4
 94 lcmp
 09 lconst_0
 0a lconst_1
-12 ldc index
-13 ldc_w index1,index2
-14 ldc2_w index1,index2
+12 ldc const
+13 ldc_w const2
+14 ldc2_w const2
 6d ldiv
-16 lload index
+16 lload local
 1e lload_0
 1f lload_1
 20 lload_2
 21 lload_3
 69 lmul
 75 lneg
-ab lookupswitch (special)
+ab lookupswitch special
 81 lor
 71 lrem
 ad lreturn
 79 lshl
 7b lshr
-37 lstore index
+37 lstore local
 3f lstore_0
 40 lstore_1
 41 lstore_2
@@ -187,19 +187,19 @@ ad lreturn
 83 lxor
 c2 monitorenter
 c3 monitorexit
-c5 multianewarray index1,index2,dimensions
-bb new index1,index2
+c5 multianewarray const2 byte
+bb new const2
 bc newarray atype
 00 nop
 57 pop
 58 pop2
-b5 putfield index1,index2
-b3 putstatic index1,index2
-a9 ret index
+b5 putfield const2
+b3 putstatic const2
+a9 ret local
 b1 return
 35 saload
 56 sastore
-11 sipush byte1,byte2
+11 sipush short
 5f swap
-aa tableswitch (special)
-c4 wide (special)
+aa tableswitch special
+c4 wide special
