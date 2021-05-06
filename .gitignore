@@ -4,4 +4,4 @@ __pycache__
 .ignore
 
 #Secret stuff in development
-byteassembler.py
+#byteassembler.py
