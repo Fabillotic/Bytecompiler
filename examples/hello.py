@@ -1,6 +1,14 @@
+"""
+Copyright 2021 Fabillo
+All rights reserved.
+
+This is the implementation of "Hello, world" in Bytecompiler.
+"""
+
 import os.path; import sys; sys.path.append(os.path.abspath(".")) #You can run 'python examples/(something).py' easily
 
 from bytecompiler import ClassFile, CodeAttribute
+from byteassembler import assemble
 
 def test():
     c = ClassFile("Main")
@@ -11,7 +19,25 @@ def test():
     constPrintStream = c.qpool("class", "java/io/PrintStream")
     constPrintln = c.qpool("method", constPrintStream, "println", "(Ljava/lang/String;)V")
 
-    code = b"\xb2" + constOut.to_bytes(2, "big") + b"\x12" + constWorld.to_bytes(1, "big") + b"\xb6" + constPrintln.to_bytes(2, "big") + b"\xb1"
+    #code = b"\xb2" + constOut.to_bytes(2, "big") + b"\x12" + constWorld.to_bytes(1, "big") + b"\xb6" + constPrintln.to_bytes(2, "big") + b"\xb1"
+    
+    code = """
+    iconst_5
+    istore_2
+    start:
+    getstatic {constOut}
+    ldc {constWorld}
+    invokevirtual {constPrintln}
+    iload_2
+    iconst_m1
+    iadd
+    istore_2
+    goto done
+    done:
+    return
+    """.format(constOut = constOut, constWorld=constWorld, constPrintln=constPrintln)
+    code = assemble(code)
+    
     c.method("main", "([Ljava/lang/String;)V", ["public", "static"], [CodeAttribute(code)])
 
     f = open("Main.class", "wb")
