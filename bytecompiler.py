@@ -246,7 +246,7 @@ class MathHelper:
     @staticmethod
     def ifsign(x, n): #sign if x < 0
         if x < 0:
-            return sign(x, n)
+            return MathHelper.sign(-x, n)
         return x
 
 class AccessHelper:
