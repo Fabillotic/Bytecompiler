@@ -1,8 +1,31 @@
+"""
+The Byteassembler takes a human-readable form of Bytecode and assembles it into actual bytecode.
+opcodes.txt contains the list of opcodes and their arguments.
+"""
+
+import sys
+import os.path
+from bytecompiler import MathHelper
+
 def test():
-    return
+    if not len(sys.argv) > 1:
+        print("Please enter a file!")
+        return
+
+    if not (os.path.exists(sys.argv[1]) and os.path.isfile(sys.argv[1])):
+        print("Not a file!")
+        return
+    
+    f = open(sys.argv[1], "r")
+    d = f.read()
+    f.close()
+
+    print(assemble(d).hex())
 
 def assemble(code):
-    return Assembler().assemble(code)
+    a = Assembler()
+    a.add_data(code)
+    return a.assemble()
 
 class Assembler:
     def __init__(self):
@@ -11,6 +34,8 @@ class Assembler:
         f.close()
 
         o = o.split("\n")[10:-1]
+
+        self.data = ""
         
         self.labels = {}
 
@@ -19,13 +44,22 @@ class Assembler:
             l = l.split(" ")
             self.opcodes[l[1]] = ((int(l[0], 16), l[2:]))
 
-    def assemble(self, data):
+    def add_data(self, data):
+        self.data += data
+
+    def assemble(self):
         code = b""
 
-        data = data.split("\n")
+        self.data = self.data.split("\n")
+
+        #TODO: Fix this mess. len(code) equates to 0. The first pass has to read the label, the second the basic code and a new third has to insert the correct offsets.
         
-        for l in data:
+        for ln, l in enumerate(self.data):
             l = self._remove_ws(l)
+            
+            if l == "":
+                continue
+
             if l.endswith(":"):
                 if l.count(" ") == 0:
                     self.labels[l[:-1]] = len(code)
@@ -33,11 +67,21 @@ class Assembler:
                 else:
                     print("Labels can't have spaces!")
                     return
-            l = l.split(" ")
+        
+        for ln, l in enumerate(self.data):
+            l = self._remove_ws(l)
+            
+            if l == "":
+                continue
 
+            if l.endswith(":"):
+                continue
+            
+            l = l.split(" ")
+            
             op = self.opcodes[l[0]]
             code += op[0].to_bytes(1, "big")
-            
+
             a = 1
             for x in op[1]:
                 if x == "local":
@@ -45,14 +89,20 @@ class Assembler:
                 elif x == "const2" or x == "const":
                     code += int(l[a]).to_bytes((1 if x == "const" else 2), "big")
                 elif x == "byte":
-                    code += int(l[a]).to_bytes(1, "big")
+                    n = 1
+                    code += MathHelper.ifsign(int(l[a]), n).to_bytes(n, "big")
                 elif x == "short":
-                    code += int(l[a]).to_bytes(2, "big")
+                    n = 2
+                    code += MathHelper.ifsign(int(l[a]), n).to_bytes(n, "big")
                 elif x == "tbranch" or x == "fbranch":
                     if not l[a] in self.labels:
                         print("Invalid branch location!")
                         return
-                    code += ((len(code) - 1) - self.labels[l[a]]).to_bytes((2 if x == "tbranch" else 4), "big")
+                    n = (2 if x == "tbranch" else 4)
+                    
+                    f = self.labels[l[a]]
+                    code += MathHelper.ifsign(-((len(code) - 1) - f), n).to_bytes(n, "big")
+                    print(l[a], code[-2:].hex())
                 elif x == "atype":
                     if l[a] == "boolean":
                         code += b"\x04"
