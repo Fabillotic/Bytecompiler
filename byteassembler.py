@@ -137,6 +137,9 @@ class Assembler:
                     return
                 a += 1
 
+        for x in lb.keys():
+            print("ERROR: Label '" + x + "' does not exist!")
+
         return code
     
     def _remove_ws(self, l): #Remove whitespace
