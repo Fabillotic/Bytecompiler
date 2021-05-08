@@ -32,7 +32,9 @@ def test():
     iconst_m1
     iadd
     istore_2
-    goto done
+    iload_2
+    ifle done
+    goto start
     done:
     return
     """.format(constOut = constOut, constWorld=constWorld, constPrintln=constPrintln)

@@ -51,9 +51,9 @@ class Assembler:
         code = b""
 
         self.data = self.data.split("\n")
-
-        #TODO: Fix this mess. len(code) equates to 0. The first pass has to read the label, the second the basic code and a new third has to insert the correct offsets.
         
+        lb = dict()
+
         for ln, l in enumerate(self.data):
             l = self._remove_ws(l)
             
@@ -62,20 +62,25 @@ class Assembler:
 
             if l.endswith(":"):
                 if l.count(" ") == 0:
-                    self.labels[l[:-1]] = len(code)
+                    l = l[:-1]
+                    
+                    if l in self.labels:
+                        print("The label '" + l + "' has already been defined.")
+                        return
+
+                    self.labels[l] = len(code)
+                    
+                    if l in lb:
+                        for e in lb[l]:
+                            n = e[1]
+                            x = e[0]
+                            
+                            code = code[:x] + MathHelper.ifsign((len(code) - (x - 1)), n).to_bytes(n, "big") + code[x+n:]
+                        del lb[l]
                     continue
                 else:
                     print("Labels can't have spaces!")
                     return
-        
-        for ln, l in enumerate(self.data):
-            l = self._remove_ws(l)
-            
-            if l == "":
-                continue
-
-            if l.endswith(":"):
-                continue
             
             l = l.split(" ")
             
@@ -95,14 +100,18 @@ class Assembler:
                     n = 2
                     code += MathHelper.ifsign(int(l[a]), n).to_bytes(n, "big")
                 elif x == "tbranch" or x == "fbranch":
-                    if not l[a] in self.labels:
-                        print("Invalid branch location!")
-                        return
                     n = (2 if x == "tbranch" else 4)
+                    if not l[a] in self.labels:
+                        code += bytes(n)
+                        
+                        if l[a] in lb:
+                            lb[l[a]] = [*lb[l[a]], (len(code) - n, n)]
+                        else:
+                            lb[l[a]] = [(len(code) - n, n)]
+                        continue
                     
                     f = self.labels[l[a]]
                     code += MathHelper.ifsign(-((len(code) - 1) - f), n).to_bytes(n, "big")
-                    print(l[a], code[-2:].hex())
                 elif x == "atype":
                     if l[a] == "boolean":
                         code += b"\x04"
