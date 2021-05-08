@@ -12,6 +12,7 @@ import sys
 import os.path
 
 from bytecompiler import ClassFile, CodeAttribute
+from byteassembler import assemble
 
 def main():
     if not len(sys.argv) > 1:
@@ -44,43 +45,131 @@ def main():
     constFlush = c.qpool("method", constPrintStream, "flush", "()V")
     constPrintln = c.qpool("method", constPrintStream, "println", "(I)V")
 
-    t3 = c.addpool("int", 30000).to_bytes(1, "big")
-    ldct3 = b"\x12" + t3 #ldc #t3
+    t3 = c.addpool("int", 30000)
+    ldct3 = assemble(f"ldc {t3}")
 
     def clean(x):
         return bytes.fromhex(x.replace(" ", ""))
 
     code = b""
-    code += ldct3 + clean("bc0a4d 033e 1d") + ldct3 + clean("a2000d") + clean("2c1d034f840301a7fff3") + clean("033e") #1230bc0a4d 033e 1d1230a2000d 2c1d034f840301a7fff3 033e #brainfuck init
+
+    code += assemble( #brainfuck init
+    f"""
+    ldc {t3}
+    newarray int
+    astore_2
+    
+    iconst_0
+    istore_3
+    
+    loop:
+    iload_3
+    ldc {t3}
+    if_icmpge done
+    
+    aload_2
+    iload_3
+    iconst_0
+    iastore
+    iinc 3 1
+    goto loop
+    
+    done:
+    iconst_0
+    istore_3
+    """)
     
     def putcode(c): #Outputs a character with ascii code c
-        return clean("b2") + constOut.to_bytes(2, "big") + clean("10" + hex(c)[2:].zfill(2) + "b6") + constWrite.to_bytes(2, "big")
+        #return clean("b2") + constOut.to_bytes(2, "big") + clean("10" + hex(c)[2:].zfill(2) + "b6") + constWrite.to_bytes(2, "big")
+        return assemble(
+        f"""
+        getstatic {constOut}
+        bipush {c}
+        invokevirtual {constWrite}
+        """)
     def flushcode(): #Calls System.out.flush()
-        return clean("b2") + constOut.to_bytes(2, "big") + clean("b6") + constFlush.to_bytes(2, "big")
+        #return clean("b2") + constOut.to_bytes(2, "big") + clean("b6") + constFlush.to_bytes(2, "big")
+        return assemble(
+        f"""
+        getstatic {constOut}
+        invokevirtual {constFlush}
+        """)
     def _ocode(): #. but print number instead of character
-        return clean("b2") + constOut.to_bytes(2, "big") + clean("2c1d2eb6") + constPrintln.to_bytes(2, "big")
+        #return clean("b2") + constOut.to_bytes(2, "big") + clean("2c1d2eb6") + constPrintln.to_bytes(2, "big")
+        return assemble(
+        f"""
+        getstatic {constOut}
+        aload_2
+        iload_3
+        iaload
+        invokevirtual {constPrintln}
+        """)
     def ocode(): #.
-        return clean("b2") + constOut.to_bytes(2, "big") + clean("2c1d2eb6") + constWrite.to_bytes(2, "big") + flushcode()
+        #return clean("b2") + constOut.to_bytes(2, "big") + clean("2c1d2eb6") + constWrite.to_bytes(2, "big") + flushcode()
+        return assemble(
+        f"""
+        getstatic {constOut}
+        aload_2
+        iload_3
+        iaload
+        invokevirtual {constWrite}
+        """) + flushcode()
     def icode(): #,
-        sysin = b"\xb2" + constIn.to_bytes(2, "big")
-        r = b"\xb6" + constRead.to_bytes(2, "big")
-        return (putcode(62) + putcode(32) + flushcode() + clean("2c1d") + sysin + r + clean("4f") + sysin + r + clean("57"))
+        #sysin = b"\xb2" + constIn.to_bytes(2, "big")
+        sysin = assemble(f"getstatic {constIn}")
+        #r = b"\xb6" + constRead.to_bytes(2, "big")
+        r = assemble(f"invokevirtual {constRead}")
+        #return (putcode(62) + putcode(32) + flushcode() + clean("2c1d") + sysin + r + clean("4f") + sysin + r + clean("57"))
+        return (putcode(62) + putcode(32) + flushcode() + assemble(f"aload_2\niload_3") + sysin + r + assemble(f"iastore") + sysin + r + assemble(f"pop"))
     def addcode(num=1): #+ / -
         if num < 0:
             num = (-num ^ 0xff) + 1
-        return clean("2c1d5c2e 10" + hex(num)[2:].zfill(2) + "60 4f")
+        #return clean("2c1d5c2e 10" + hex(num)[2:].zfill(2) + "60 4f")
+        return assemble(
+        f"""
+        aload_2
+        iload_3
+        dup2
+        iaload
+        bipush {num}
+        iadd
+        iastore
+        """)
     def shiftcode(num=1): #< / >
         if num < 0:
             num = (-num ^ 0xffff) + 1
-        return clean("1d11" + hex(num)[2:].zfill(4) + "603e")
+        #return clean("1d11" + hex(num)[2:].zfill(4) + "603e")
+        return assemble(
+        f"""
+        iload_3
+        sipush {num}
+        iadd
+        istore_3
+        """)
     def obcode(offset=0): #[
         if offset < 0:
             offset = (-offset ^ 0xffff) + 1
-        return clean("2c1d2e 99" + hex(offset)[2:].zfill(4))
+        #return clean("2c1d2e 99" + hex(offset)[2:].zfill(4))
+        return assemble(
+        f"""
+        aload_2
+        iload_3
+        iaload
+
+        ifeq {offset}
+        """)
     def cbcode(offset): #]
         if offset < 0:
             offset = (-offset ^ 0xffff) + 1
-        return clean("2c1d2e 9a" + hex(offset)[2:].zfill(4))
+        #return clean("2c1d2e 9a" + hex(offset)[2:].zfill(4))
+        return assemble(
+        f"""
+        aload_2
+        iload_3
+        iaload
+
+        ifne {offset}
+        """)
 
     #I will now be using bf (The brainfuck code I read earlier)
     
@@ -120,7 +209,8 @@ def main():
             code = code[:o-2] + fill + code[o:]
             continue
 
-    code += b"\xb1"
+    #code += b"\xb1"
+    code += assemble(f"return")
     
     c.method("main", "([Ljava/lang/String;)V", ["public", "static"], [CodeAttribute(code)])
 
