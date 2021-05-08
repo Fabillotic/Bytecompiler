@@ -101,6 +101,13 @@ class Assembler:
                     code += MathHelper.ifsign(int(l[a]), n).to_bytes(n, "big")
                 elif x == "tbranch" or x == "fbranch":
                     n = (2 if x == "tbranch" else 4)
+                    
+                    try:
+                        code += MathHelper.ifsign(int(l[a]), n).to_bytes(n, "big")
+                        continue
+                    except ValueError:
+                        pass
+
                     if not l[a] in self.labels:
                         code += bytes(n)
                         
