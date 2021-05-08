@@ -18,10 +18,8 @@ def test():
     constOut = c.qpool("field", constSystem, "out", "Ljava/io/PrintStream;")
     constPrintStream = c.qpool("class", "java/io/PrintStream")
     constPrintln = c.qpool("method", constPrintStream, "println", "(Ljava/lang/String;)V")
-
-    #code = b"\xb2" + constOut.to_bytes(2, "big") + b"\x12" + constWorld.to_bytes(1, "big") + b"\xb6" + constPrintln.to_bytes(2, "big") + b"\xb1"
     
-    code = """
+    code = f"""
     iconst_5
     istore_2
     start:
@@ -37,7 +35,7 @@ def test():
     goto start
     done:
     return
-    """.format(constOut = constOut, constWorld=constWorld, constPrintln=constPrintln)
+    """
     code = assemble(code)
     
     c.method("main", "([Ljava/lang/String;)V", ["public", "static"], [CodeAttribute(code)])
