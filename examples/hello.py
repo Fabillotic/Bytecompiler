@@ -11,7 +11,7 @@ from bytecompiler import ClassFile, CodeAttribute
 from byteassembler import assemble
 
 def test():
-    c = ClassFile("Main")
+    c = ClassFile("Main", version=(49, 0))
 
     constWorld = c.qpool("string", "Hello, world!")
     constSystem = c.qpool("class", "java/lang/System")
