@@ -39,3 +39,19 @@ access - Access flags. Default: ```["public"]```
 sname - The name of the super class. Default: ```"java/lang/Object"```
 
 version - The version. Default: ```(49, 0)```
+
+### Byteassembler
+```python
+from byteassembler import assemble
+
+assemble( #Returns the bytecode instructions of this assembly code
+f"""
+iconst_3
+istore_2
+loop:
+iinc 2 -1
+iload_2
+ifgt loop
+"""
+)
+```
