@@ -2,7 +2,7 @@
 
 A tool to generate Java bytecode in Python.
 
-More information on bytecode can be found here: [Oracle docs](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html), [Wikipedia class file](https://en.wikipedia.org/wiki/Java_class_file), [Wikipedia instruction listings](https://en.wikipedia.org/wiki/Java_bytecode_instruction_listings) (Very useful)
+More information on bytecode can be found here: [Oracle docs](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html), [Wikipedia class file](https://en.wikipedia.org/wiki/Java_class_file), [Wikipedia instruction listings](https://en.wikipedia.org/wiki/Java_bytecode_instruction_listings)
 
 ## Usage
 
