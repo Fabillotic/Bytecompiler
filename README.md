@@ -24,7 +24,7 @@ cf.field("myfield", "Ljava/lang/Object;", ["private"]) #Create a private field c
 
 from bytecompiler import CodeAttribute
 code = CodeAttribute(b"Insert bytecode in bytes format")
-cf.method("main", "([Ljava/lang/String;)V", ["public", "static"], [code]) #Typical main method
+cf.method("main", "([Ljava/lang/String;)V", ["public", "static"], [code]) #Standart main method
 
 f = open("Main.class", "wb")
 f.write(cf.serialize()) #Serialize the classfile
